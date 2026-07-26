@@ -5,10 +5,15 @@ import { isFresh, readCache, writeCache } from "./cache.mjs";
 export async function getSnapshot({
   cacheMinutes = 5,
   force = false,
+  preferCache = false,
   fetcher = fetchSnapshot,
 } = {}) {
   const cached = await readCache();
-  if (!force && isFresh(cached, cacheMinutes * 60_000)) {
+  if (
+    !force &&
+    cached &&
+    (preferCache || isFresh(cached, cacheMinutes * 60_000))
+  ) {
     return { snapshot: cached, cached, stale: false };
   }
 

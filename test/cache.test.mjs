@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
+  expireCache,
   invalidateCache,
   isFresh,
   readCache,
@@ -21,6 +22,10 @@ test("cache writes atomically, expires and invalidates", async () => {
     assert.equal(cached.tasks[0].id, "1");
     assert.equal(isFresh(cached, 500, 1_499), true);
     assert.equal(isFresh(cached, 500, 1_500), false);
+    await expireCache();
+    const expired = await readCache();
+    assert.equal(expired.tasks[0].id, "1");
+    assert.equal(isFresh(expired, 500, 1_001), false);
     await invalidateCache();
     assert.equal(await readCache(), null);
   } finally {

@@ -3,23 +3,12 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-export async function commandExists(command) {
-  try {
-    await execFileAsync("sh", ["-c", `command -v "$1"`, "tickbar", command]);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-export async function walkerExecutable() {
-  return (await commandExists("omarchy-launch-walker"))
-    ? "omarchy-launch-walker"
-    : "walker";
+export function walkerExecutable() {
+  return process.env.TICKBAR_WALKER_BIN || "walker";
 }
 
 export async function walkerInput(placeholder) {
-  const executable = await walkerExecutable();
+  const executable = walkerExecutable();
   const result = await runWalker(executable, [
     "--dmenu",
     "--inputonly",
@@ -37,7 +26,7 @@ export async function walkerInput(placeholder) {
 
 export async function walkerSelect(entries, placeholder) {
   if (!entries.length) return null;
-  const executable = await walkerExecutable();
+  const executable = walkerExecutable();
   const result = await runWalker(
     executable,
     [
@@ -89,9 +78,16 @@ export function notify(summary, body, urgency = "low") {
 }
 
 export function openUrl(url) {
-  const child = spawn("xdg-open", [url], {
+  const child = spawn("gio", ["open", url], {
     detached: true,
     stdio: "ignore",
+  });
+  child.once("error", () => {
+    const fallback = spawn("xdg-open", [url], {
+      detached: true,
+      stdio: "ignore",
+    });
+    fallback.unref();
   });
   child.unref();
 }

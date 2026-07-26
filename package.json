@@ -1,6 +1,6 @@
 {
   "name": "ticktick-waybar",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A fast TickTick module for Waybar, driven by Walker.",
   "type": "module",
   "private": true,

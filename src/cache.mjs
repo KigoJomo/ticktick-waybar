@@ -43,3 +43,9 @@ export async function invalidateCache() {
     if (error.code !== "ENOENT") throw error;
   }
 }
+
+export async function expireCache() {
+  const cached = await readCache();
+  if (!cached) return;
+  await writeCache(cached, 0);
+}

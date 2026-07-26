@@ -34,6 +34,8 @@ The bar shows the number of overdue and due-today tasks. When TickTick is
 offline, the last successful result remains visible in a stale state.
 Inbox is discovered from TickTick's global task filter and cached locally;
 Notes are excluded from the completion menu.
+Walker opens from the last cached snapshot so API latency never blocks the
+menu. Status polling and every successful mutation keep that snapshot current.
 
 The same actions are available from the terminal:
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import * as backend from "./backend.mjs";
-import { invalidateCache, readCache } from "./cache.mjs";
+import { expireCache, readCache } from "./cache.mjs";
 import { loadConfig } from "./config.mjs";
 import { getSnapshot } from "./data.mjs";
 import {
@@ -55,7 +55,7 @@ async function dispatch(name, args) {
     case "menu": {
       const { snapshot } = await getSnapshot({
         cacheMinutes: config.cacheMinutes,
-        force: true,
+        preferCache: true,
       });
       let selected = await chooseTask({
         tasks: snapshot.tasks,
@@ -102,7 +102,7 @@ async function dispatch(name, args) {
     case "version":
     case "--version":
     case "-v":
-      console.log("ticktick-waybar 0.1.0");
+      console.log("ticktick-waybar 0.1.1");
       break;
     default:
       throw new Error(`Unknown command: ${name}\n\n${helpText}`);
@@ -131,7 +131,7 @@ async function runComplete(task) {
 }
 
 async function refresh() {
-  await invalidateCache();
+  await expireCache();
   await signalWaybar();
 }
 

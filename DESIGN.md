@@ -70,6 +70,12 @@
   render TickTick as a separate adjacent pill.
 - 2026-07-26: Use the actual TickTick mark from Simple Icons rather than a
   generic checkmark.
+- 2026-07-26: Render the Simple Icons glyph at 90% with a half-point optical
+  rise so its circle aligns with the adjacent count at Waybar's 12px text size.
+- 2026-07-26: Open Walker from cached task data and invoke its dmenu mode
+  directly. Network refreshes must not block an interface from appearing.
+- 2026-07-26: Invalidate successful mutations by expiring the cached snapshot
+  rather than deleting it, preserving an instant stale-while-refreshing menu.
 
 ## Non-goals
 
