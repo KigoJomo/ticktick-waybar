@@ -1,0 +1,29 @@
+{
+  "projects": [
+    {
+      "id": "inbox-demo",
+      "name": "Inbox",
+      "kind": "INBOX"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "demo-overdue",
+      "projectId": "inbox-demo",
+      "title": "Review the release notes",
+      "dueDate": "2026-07-25T00:00:00.000+0000",
+      "isAllDay": true,
+      "priority": 5,
+      "status": 0
+    },
+    {
+      "id": "demo-today",
+      "projectId": "inbox-demo",
+      "title": "Reply to Alice",
+      "dueDate": "2026-07-26T00:00:00.000+0000",
+      "isAllDay": true,
+      "priority": 0,
+      "status": 0
+    }
+  ]
+}

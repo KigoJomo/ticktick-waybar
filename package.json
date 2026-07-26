@@ -1,0 +1,21 @@
+{
+  "name": "ticktick-waybar",
+  "version": "0.1.0",
+  "description": "A fast TickTick module for Waybar, driven by Walker.",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "check": "node --check src/*.mjs scripts/*.mjs test/*.mjs",
+    "test": "node --test",
+    "test:e2e": "node scripts/e2e.mjs",
+    "verify": "npm run check && npm test"
+  },
+  "dependencies": {
+    "@ticktick/ticktick-cli": "0.1.10",
+    "jsonc-parser": "3.3.1",
+    "simple-icons-font": "16.27.1"
+  }
+}
