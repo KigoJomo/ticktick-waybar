@@ -21,7 +21,7 @@ export async function walkerInput(placeholder) {
     "--placeholder",
     `${placeholder}…`,
   ]);
-  return result.trim();
+  return result.cancelled ? null : result.output.trim();
 }
 
 export async function walkerSelect(entries, placeholder) {
@@ -43,8 +43,8 @@ export async function walkerSelect(entries, placeholder) {
     ],
     `${entries.map((entry) => entry.label).join("\n")}\n`,
   );
-  if (!result.trim()) return null;
-  const index = Number(result.trim());
+  if (result.cancelled || !result.output.trim()) return null;
+  const index = Number(result.output.trim());
   return Number.isInteger(index) ? entries[index] || null : null;
 }
 
@@ -61,8 +61,10 @@ function runWalker(executable, args, input = "") {
     });
     child.once("error", reject);
     child.once("exit", (code) => {
-      if (code === 0) resolve(stdout);
-      else if (code === 1 || code === 130) resolve("");
+      if (code === 0) resolve({ output: stdout, cancelled: false });
+      else if (code === 1 || code === 130) {
+        resolve({ output: "", cancelled: true });
+      }
       else reject(new Error(`Walker exited with status ${code}`));
     });
     child.stdin.end(input);

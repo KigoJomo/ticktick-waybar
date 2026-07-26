@@ -7,6 +7,8 @@ through Walker without opening the full app.
 
 ![Searchable TickTick completion menu in Walker](docs/screenshots/walker.png)
 
+![Detailed task editor in Walker](docs/screenshots/detailed.png)
+
 ## Install
 
 Requires Waybar, Walker, Node.js 20+ and npm.
@@ -26,7 +28,7 @@ credential directory and token file to the current user.
 | Action | Result |
 | --- | --- |
 | Hover | Preview overdue and today's tasks |
-| Left-click | Search and complete a task |
+| Left-click | Complete a task or open quick/detailed creation |
 | Right-click | Add a task to Inbox |
 | Middle-click | Open TickTick Today |
 
@@ -42,9 +44,15 @@ The same actions are available from the terminal:
 ```bash
 tickbar menu
 tickbar add
+tickbar add --details
 tickbar auth
 tickbar refresh
 ```
+
+Detailed creation is a small Walker editor. Set only the fields you need, then
+choose `Create task`. It supports description, due date or local time, priority,
+list, tags and comma-separated subtasks. Dates accept `today`, `tomorrow`,
+`YYYY-MM-DD` or `YYYY-MM-DD HH:MM`; local times use the configured timezone.
 
 ## Configure
 

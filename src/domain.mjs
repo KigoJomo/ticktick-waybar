@@ -49,6 +49,120 @@ export function dateKey(date, timeZone) {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
+export function parseDueInput(
+  value,
+  { now = new Date(), timeZone = systemTimeZone() } = {},
+) {
+  const input = singleLine(value);
+  const lowered = input.toLowerCase();
+  let date;
+  let time = null;
+
+  if (lowered === "today" || lowered === "tomorrow") {
+    date = dateKey(now, timeZone);
+    if (lowered === "tomorrow") date = shiftDateKey(date, 1);
+  } else {
+    const match = input.match(
+      /^(\d{4}-\d{2}-\d{2})(?:[ t](\d{2}):(\d{2}))?$/,
+    );
+    if (!match) {
+      throw new Error(
+        "Use today, tomorrow, YYYY-MM-DD or YYYY-MM-DD HH:MM",
+      );
+    }
+    date = match[1];
+    if (match[2] !== undefined) time = `${match[2]}:${match[3]}`;
+  }
+
+  assertDateKey(date);
+  if (!time) {
+    return {
+      allDay: true,
+      dueDate: `${date}T00:00:00.000Z`,
+      label: date,
+      timeZone,
+    };
+  }
+
+  const dueDate = zonedDateTimeToIso(date, time, timeZone);
+  return {
+    allDay: false,
+    dueDate,
+    label: `${date} ${time}`,
+    timeZone,
+  };
+}
+
+function shiftDateKey(value, days) {
+  const [year, month, day] = value.split("-").map(Number);
+  const shifted = new Date(Date.UTC(year, month - 1, day + days, 12));
+  return shifted.toISOString().slice(0, 10);
+}
+
+function assertDateKey(value) {
+  const [year, month, day] = value.split("-").map(Number);
+  const parsed = new Date(Date.UTC(year, month - 1, day, 12));
+  if (
+    parsed.getUTCFullYear() !== year ||
+    parsed.getUTCMonth() !== month - 1 ||
+    parsed.getUTCDate() !== day
+  ) {
+    throw new Error(`Invalid date: ${value}`);
+  }
+}
+
+function zonedDateTimeToIso(date, time, timeZone) {
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+  if (hour > 23 || minute > 59) throw new Error(`Invalid time: ${time}`);
+
+  const target = Date.UTC(year, month - 1, day, hour, minute);
+  let candidate = target;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const parts = zonedParts(new Date(candidate), timeZone);
+    const represented = Date.UTC(
+      parts.year,
+      parts.month - 1,
+      parts.day,
+      parts.hour,
+      parts.minute,
+    );
+    candidate -= represented - target;
+  }
+
+  const resolved = zonedParts(new Date(candidate), timeZone);
+  if (
+    resolved.year !== year ||
+    resolved.month !== month ||
+    resolved.day !== day ||
+    resolved.hour !== hour ||
+    resolved.minute !== minute
+  ) {
+    throw new Error(`The local time ${date} ${time} does not exist`);
+  }
+  return new Date(candidate).toISOString();
+}
+
+function zonedParts(value, timeZone) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(value);
+  const fields = Object.fromEntries(parts.map(({ type, value }) => [type, value]));
+  return {
+    year: Number(fields.year),
+    month: Number(fields.month),
+    day: Number(fields.day),
+    hour: Number(fields.hour),
+    minute: Number(fields.minute),
+  };
+}
+
 export function taskDateKey(task, timeZone) {
   const raw = task.dueDate || task.startDate;
   if (!raw) return null;
@@ -131,7 +245,10 @@ export function buildTaskMenu(
   { includeAllAction = true, now = new Date(), timeZone = systemTimeZone() } = {},
 ) {
   const due = dueTasks(tasks, now, timeZone);
-  const entries = [{ type: "add", label: "＋  Add task" }];
+  const entries = [
+    { type: "add", label: "＋  Quick add" },
+    { type: "add-detailed", label: "✎  Detailed task" },
+  ];
   entries.push(
     ...due.map((task) => ({
       type: "complete",

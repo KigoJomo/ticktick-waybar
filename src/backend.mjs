@@ -86,7 +86,7 @@ export async function fetchSnapshot() {
   return { projects, tasks };
 }
 
-export async function createTask(title, projectId) {
+export async function createTask(title, projectId, options = {}) {
   if (!projectId) throw new Error("A TickTick project ID is required");
   const args = [
     "task",
@@ -95,10 +95,40 @@ export async function createTask(title, projectId) {
     title,
     "--project",
     projectId,
-    "--json",
   ];
+  appendOption(args, "--content", options.content);
+  if (options.allDay) args.push("--all-day");
+  appendOption(args, "--due-date", options.dueDate);
+  appendOption(args, "--time-zone", options.timeZone);
+  if (Number(options.priority) > 0) {
+    appendOption(args, "--priority", String(options.priority));
+  }
+  if (options.tags?.length) {
+    appendOption(
+      args,
+      "--tags",
+      Array.isArray(options.tags) ? options.tags.join(",") : options.tags,
+    );
+  }
+  if (options.items?.length) {
+    appendOption(
+      args,
+      "--items",
+      JSON.stringify(
+        options.items.map((title) =>
+          typeof title === "string" ? { title, status: 0 } : title,
+        ),
+      ),
+    );
+  }
+  args.push("--json");
   const { stdout } = await runTickTick(args);
   return parseCliJson(stdout);
+}
+
+function appendOption(args, flag, value) {
+  if (value === undefined || value === null || value === "") return;
+  args.push(flag, String(value));
 }
 
 export async function completeTask(task) {

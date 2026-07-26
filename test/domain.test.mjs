@@ -6,6 +6,7 @@ import {
   classifyTask,
   escapePango,
   inferInboxProjectId,
+  parseDueInput,
   parseCliJson,
   resolveInbox,
   sortTasks,
@@ -56,6 +57,29 @@ test("classifyTask preserves all-day dates and respects timed task timezone", ()
       timeZone,
     ),
     "overdue",
+  );
+});
+
+test("detailed due dates support keywords, all-day dates and local times", () => {
+  assert.deepEqual(parseDueInput("today", { now, timeZone }), {
+    allDay: true,
+    dueDate: "2026-07-26T00:00:00.000Z",
+    label: "2026-07-26",
+    timeZone,
+  });
+  assert.equal(
+    parseDueInput("tomorrow", { now, timeZone }).dueDate,
+    "2026-07-27T00:00:00.000Z",
+  );
+  assert.deepEqual(parseDueInput("2026-07-26 14:30", { timeZone }), {
+    allDay: false,
+    dueDate: "2026-07-26T11:30:00.000Z",
+    label: "2026-07-26 14:30",
+    timeZone,
+  });
+  assert.throws(
+    () => parseDueInput("2026-02-30", { timeZone }),
+    /Invalid date/,
   );
 });
 
@@ -128,9 +152,9 @@ test("menu includes add, due tasks and all-open fallback", () => {
   );
   assert.deepEqual(
     entries.map((entry) => entry.type),
-    ["add", "complete", "all"],
+    ["add", "add-detailed", "complete", "all"],
   );
-  assert.equal(entries[1].task.id, "1");
+  assert.equal(entries[2].task.id, "1");
 });
 
 test("Inbox resolution supports explicit, kind, name and id signals", () => {

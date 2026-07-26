@@ -29,6 +29,8 @@
 - Left-click: searchable task completion menu
 - Right-click: one-line Inbox capture
 - Middle-click: TickTick Today in the browser
+- Detailed task: optional Walker editor for description, due date or time,
+  priority, list, tags and subtasks
 - Hover: at most eight task titles, grouped by overdue and today
 - Escape or blank input: cancel without side effects
 - Successful mutations: notify and refresh immediately
@@ -43,6 +45,8 @@
   tasks and all-open fallback
 - Walker quick-add prompt (`src/desktop.mjs`, `src/service.mjs`): one-line Inbox
   capture
+- Walker detailed-task editor (`src/desktop.mjs`, `src/service.mjs`): editable
+  draft fields with explicit create and Escape cancellation
 - Desktop notification (`src/desktop.mjs`): success or failure confirmation
 
 ## States
@@ -76,10 +80,13 @@
   directly. Network refreshes must not block an interface from appearing.
 - 2026-07-26: Invalidate successful mutations by expiring the cached snapshot
   rather than deleting it, preserving an instant stale-while-refreshing menu.
+- 2026-07-26: Keep right-click as title-only quick capture. Put optional task
+  fields in a Walker draft editor reached through the left-click menu so users
+  edit only the details they need.
 
 ## Non-goals
 
-- No task editor, postponing, deletion, habits or recurrence authoring
+- No existing-task editor, postponing, deletion, habits or recurrence authoring
 - No natural-language date parser
 - No custom daemon
 - No app-specific visual theme

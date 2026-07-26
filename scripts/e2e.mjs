@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 import {
   completeTask,
+  createTask,
   deleteTask,
   fetchSnapshot,
-  runTickTick,
 } from "../src/backend.mjs";
 import {
   dateKey,
   dueTasks,
-  parseCliJson,
   resolveInbox,
 } from "../src/domain.mjs";
 import { loadConfig } from "../src/config.mjs";
@@ -16,7 +15,7 @@ import { loadConfig } from "../src/config.mjs";
 const config = await loadConfig();
 const title = `[ticktick-waybar e2e ${Date.now()}]`;
 const today = dateKey(new Date(), config.timeZone);
-const timestamp = `${today}T00:00:00+0000`;
+const timestamp = `${today}T00:00:00.000Z`;
 let created = null;
 
 try {
@@ -29,23 +28,15 @@ try {
   const inbox = resolveInbox(before.projects);
   if (!inbox) throw new Error("Inbox could not be discovered for E2E testing");
 
-  const { stdout } = await runTickTick([
-    "task",
-    "create",
-    "--title",
-    title,
-    "--project",
-    inbox.id,
-    "--all-day",
-    "--start-date",
-    timestamp,
-    "--due-date",
-    timestamp,
-    "--time-zone",
-    config.timeZone,
-    "--json",
-  ]);
-  created = parseCliJson(stdout);
+  created = await createTask(title, inbox.id, {
+    content: "Disposable detailed-task verification",
+    allDay: true,
+    dueDate: timestamp,
+    timeZone: config.timeZone,
+    priority: 1,
+    tags: ["tickbar-e2e"],
+    items: ["Disposable subtask"],
+  });
   if (Array.isArray(created)) [created] = created;
   if (!created?.id || !created?.projectId) {
     throw new Error("Created task did not return an ID and project ID");
@@ -60,8 +51,21 @@ try {
     new Date(),
     config.timeZone,
   ).length;
-  if (!afterCreate.tasks.some((task) => task.id === created.id)) {
+  const displayed = afterCreate.tasks.find((task) => task.id === created.id);
+  if (!displayed) {
     throw new Error("Created task was not returned by the open-task filter");
+  }
+  if (displayed.content !== "Disposable detailed-task verification") {
+    throw new Error("Created task description was not preserved");
+  }
+  if (Number(displayed.priority) !== 1) {
+    throw new Error("Created task priority was not preserved");
+  }
+  if (!displayed.tags?.includes("tickbar-e2e")) {
+    throw new Error("Created task tags were not preserved");
+  }
+  if (!displayed.items?.some((item) => item.title === "Disposable subtask")) {
+    throw new Error("Created task subtasks were not preserved");
   }
   if (afterCount !== beforeCount + 1) {
     throw new Error(
@@ -82,6 +86,7 @@ try {
       dueCountBefore: beforeCount,
       dueCountAfterCreate: afterCount,
       completed: true,
+      detailedFields: true,
     })}\n`,
   );
 } finally {

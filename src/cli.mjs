@@ -12,6 +12,7 @@ import {
 } from "./desktop.mjs";
 import { buildWaybarStatus, errorStatus } from "./domain.mjs";
 import {
+  addDetailedTask,
   addTask,
   chooseTask,
   completeSelectedTask,
@@ -65,6 +66,8 @@ async function dispatch(name, args) {
       if (!selected) break;
       if (selected.type === "add") {
         await runAdd(config);
+      } else if (selected.type === "add-detailed") {
+        await runDetailedAdd(config);
       } else if (selected.type === "all") {
         selected = await chooseTask({
           tasks: snapshot.tasks,
@@ -81,7 +84,11 @@ async function dispatch(name, args) {
       break;
     }
     case "add":
-      await runAdd(config, args.join(" ") || undefined);
+      if (args[0] === "--details") {
+        await runDetailedAdd(config);
+      } else {
+        await runAdd(config, args.join(" ") || undefined);
+      }
       break;
     case "auth":
       await backend.authenticate();
@@ -102,7 +109,7 @@ async function dispatch(name, args) {
     case "version":
     case "--version":
     case "-v":
-      console.log("ticktick-waybar 0.1.1");
+      console.log("ticktick-waybar 0.2.0");
       break;
     default:
       throw new Error(`Unknown command: ${name}\n\n${helpText}`);
@@ -130,6 +137,18 @@ async function runComplete(task) {
   });
 }
 
+async function runDetailedAdd(config) {
+  return addDetailedTask({
+    backend,
+    getSnapshot,
+    prompt: walkerInput,
+    select: walkerSelect,
+    notify,
+    refresh,
+    config,
+  });
+}
+
 async function refresh() {
   await expireCache();
   await signalWaybar();
@@ -153,6 +172,7 @@ Commands:
   status          Print Waybar JSON
   menu            Open the completion menu
   add [title]     Add a task to Inbox
+  add --details   Open the detailed task editor
   auth            Connect TickTick through browser OAuth
   refresh         Clear cached tasks and refresh Waybar
   open            Open TickTick Today

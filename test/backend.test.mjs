@@ -56,11 +56,30 @@ printf '%s\n' "$@" > "$ARGS_FILE"
 printf '%s\n' '{"id":"created","projectId":"inbox-1","title":"Buy milk"}'
 `,
       async () => {
-        const created = await createTask("Buy milk", "inbox-1");
+        const created = await createTask("Buy milk", "inbox-1", {
+          content: "Oat milk",
+          allDay: true,
+          dueDate: "2026-07-27T00:00:00.000Z",
+          timeZone: "Africa/Nairobi",
+          priority: 5,
+          tags: ["errands", "home"],
+          items: ["Compare prices"],
+        });
         assert.equal(created.projectId, "inbox-1");
         const args = (await fs.readFile(argsFile, "utf8")).trim().split("\n");
         assert.equal(args.includes("--project"), true);
         assert.equal(args[args.indexOf("--project") + 1], "inbox-1");
+        assert.equal(args[args.indexOf("--content") + 1], "Oat milk");
+        assert.equal(args.includes("--all-day"), true);
+        assert.equal(
+          args[args.indexOf("--due-date") + 1],
+          "2026-07-27T00:00:00.000Z",
+        );
+        assert.equal(args[args.indexOf("--priority") + 1], "5");
+        assert.equal(args[args.indexOf("--tags") + 1], "errands,home");
+        assert.deepEqual(JSON.parse(args[args.indexOf("--items") + 1]), [
+          { title: "Compare prices", status: 0 },
+        ]);
       },
     );
   } finally {
