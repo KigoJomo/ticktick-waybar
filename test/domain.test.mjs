@@ -97,7 +97,7 @@ test("Waybar status escapes markup and exposes semantic states", () => {
     },
   ];
   const status = buildWaybarStatus(tasks, { now, timeZone });
-  const mark = `<span font_family="Simple Icons" size="90%" rise="512">${TICKTICK_GLYPH}</span>`;
+  const mark = `<span font_family="Simple Icons" size="90%" rise="-512">${TICKTICK_GLYPH}</span>`;
   assert.equal(status.text, `${mark} 2`);
   assert.equal(status.class, "overdue");
   assert.match(status.tooltip, /Ship &lt;release&gt; &amp; notes/);

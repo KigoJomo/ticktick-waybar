@@ -2,7 +2,7 @@ const DATE_PREFIX = /^\d{4}-\d{2}-\d{2}/;
 export const TICKTICK_GLYPH = "\uf5cb";
 
 function tickTickMark() {
-  return `<span font_family="Simple Icons" size="90%" rise="512">${TICKTICK_GLYPH}</span>`;
+  return `<span font_family="Simple Icons" size="90%" rise="-512">${TICKTICK_GLYPH}</span>`;
 }
 
 export function parseCliJson(output) {
