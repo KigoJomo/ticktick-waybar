@@ -1,45 +1,34 @@
 # TickTick Waybar
 
-A small, Waybar-first TickTick client for Hyprland. Add and complete tasks
-through Walker without opening the full app.
+TickTick controls for Waybar and Walker. The bar shows overdue and due-today tasks, while Walker handles quick capture, detailed task entry, and completion.
 
 ![TickTick as a separate Waybar pill](docs/screenshots/waybar.png)
 
-![Searchable TickTick completion menu in Walker](docs/screenshots/walker.png)
+![Searchable task completion in Walker](docs/screenshots/walker.png)
 
-![Detailed task editor in Walker](docs/screenshots/detailed.png)
+![Detailed task entry in Walker](docs/screenshots/detailed.png)
 
 ## Install
 
-Requires Waybar, Walker, Node.js 20+ and npm.
+You need Waybar, Walker, Node.js 20 or newer, and npm.
 
 ```bash
 git clone https://github.com/KigoJomo/ticktick-waybar.git ~/.local/share/ticktick-waybar
 ~/.local/share/ticktick-waybar/install.sh
 ```
 
-The installer opens TickTick's browser OAuth, installs the CC0 TickTick brand
-glyph, backs up the active Waybar files, adds a separate pill beside the centre
-widgets and reloads Waybar. After OAuth, it restricts the official CLI's
-credential directory and token file to the current user.
+The installer opens TickTick's OAuth flow, installs the TickTick glyph, backs up the active Waybar files, adds the module, and reloads Waybar. It also restricts the TickTick CLI credential files to your user account.
 
 ## Use
 
-| Action | Result |
+| Waybar action | What it does |
 | --- | --- |
-| Hover | Preview overdue and today's tasks |
-| Left-click | Complete a task or open quick/detailed creation |
-| Right-click | Add a task to Inbox |
-| Middle-click | Open TickTick Today |
+| Hover | Shows overdue and today's tasks |
+| Left-click | Opens completion and task creation |
+| Right-click | Adds a task to Inbox |
+| Middle-click | Opens TickTick Today |
 
-The bar shows the number of overdue and due-today tasks. When TickTick is
-offline, the last successful result remains visible in a stale state.
-Inbox is discovered from TickTick's global task filter and cached locally;
-Notes are excluded from the completion menu.
-Walker opens from the last cached snapshot so API latency never blocks the
-menu. Status polling and every successful mutation keep that snapshot current.
-
-The same actions are available from the terminal:
+The same actions are available in a terminal.
 
 ```bash
 tickbar menu
@@ -49,14 +38,13 @@ tickbar auth
 tickbar refresh
 ```
 
-Detailed creation is a small Walker editor. Set only the fields you need, then
-choose `Create task`. It supports description, due date or local time, priority,
-list, tags and comma-separated subtasks. Dates accept `today`, `tomorrow`,
-`YYYY-MM-DD` or `YYYY-MM-DD HH:MM`; local times use the configured timezone.
+Detailed entry supports a description, due date, local time, priority, list, tags, and comma-separated subtasks. Dates accept `today`, `tomorrow`, `YYYY-MM-DD`, or `YYYY-MM-DD HH:MM`.
+
+The Walker menu opens from a local snapshot, so TickTick API latency does not hold up the menu. A failed refresh leaves the previous result visible and marks it stale. Notes do not appear in the completion list.
 
 ## Configure
 
-The installer accepts alternate Waybar paths and positions:
+The installer can target non-default Waybar files and either the left, centre, or right module group.
 
 ```bash
 ./install.sh \
@@ -65,8 +53,7 @@ The installer accepts alternate Waybar paths and positions:
   --position center
 ```
 
-Optional runtime settings live at
-`~/.config/ticktick-waybar/config.json`:
+Runtime settings live in `~/.config/ticktick-waybar/config.json`.
 
 ```json
 {
@@ -78,12 +65,9 @@ Optional runtime settings live at
 }
 ```
 
-TickTick's official API does not expose Inbox in its project list. The module
-normally discovers its `inbox…` ID from existing tasks. On a completely empty
-account, set `defaultProjectId` once to the target list ID shown by
-`ticktick project list --json`.
+TickTick's API does not return Inbox in the project list. TickTick Waybar normally learns the Inbox ID from existing tasks. For a completely empty account, set `defaultProjectId` to the list ID returned by `ticktick project list --json`.
 
-Update with `git pull && ./install.sh --no-auth`.
+Update an existing install with `git pull && ./install.sh --no-auth`.
 
 ## Uninstall
 
@@ -91,9 +75,7 @@ Update with `git pull && ./install.sh --no-auth`.
 ./uninstall.sh
 ```
 
-Add `--purge` to sign out and remove TickTick Waybar's cache, state and runtime
-configuration. Timestamped Waybar backups remain under
-`~/.config/waybar/.ticktick-waybar-backups/`.
+Pass `--purge` to sign out and remove the cache, state, and runtime configuration. Waybar backups remain in `~/.config/waybar/.ticktick-waybar-backups/`.
 
 ## Development
 
@@ -102,12 +84,6 @@ npm ci
 npm run verify
 ```
 
-The TickTick adapter uses the official
-[`@ticktick/ticktick-cli`](https://github.com/TickTeam/ticktick-cli).
-The TickTick glyph comes from
-[`simple-icons-font`](https://github.com/simple-icons/simple-icons-font);
-see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The TickTick adapter uses the official `@ticktick/ticktick-cli` package. The glyph comes from [`simple-icons-font`](https://github.com/simple-icons/simple-icons-font). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for the bundled licence notices.
 
-## Licence
-
-MIT
+MIT licensed.
